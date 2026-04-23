@@ -1,3 +1,15 @@
+// --- 1. БАЗОВЫЕ ПРАВИЛА (Константы) ---
+const BASE_SYSTEM_RULES = `You are Jedi AI Copilot. Return ONLY a valid JSON array.
+Design System: Jedi CSS (4px grid, Tailwind-like colors).
+Rule: All icons MUST be isolated and NOT placed on background plates.`;
+
+// --- 2. COMPONENT DICTIONARY (Словарь компонентов) ---
+const COMPONENT_LIBRARY = {
+  button: `Button Rule: Must have RECTANGLE (bg) and TEXT (label) with exact same bounds.`,
+  input: `Input Rule: Rectangle border + Placeholder text 16px from left.`,
+  card: `Card Rule: Rectangle with white background, 12px radius, and 16px padding.`
+};
+
 export default async function handler(req, res) {
   // 1. Разрешаем CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
