@@ -1,21 +1,26 @@
-// --- 1. ТВОИ БАЗОВЫЕ ПРАВИЛА (из index_Nvidia.js) ---
-const BASE_SYSTEM_RULES = `You are Jedi AI Copilot. Return ONLY a valid JSON array.
-Design System: Jedi CSS (4px grid).
-Rule: All icons MUST be isolated and NOT placed on background plates.
-Layout: Use 16px gaps. No markdown, no comments.`;
+// --- 1. ТВОИ БАЗОВЫЕ ПРАВИЛА  ---
+const BASE_SYSTEM_RULES = `You are Jedi AI Copilot. 
+Everything is based on the "Jedi Design System".
+Return ONLY a valid JSON array. No comments.
+Rule: All variables must strictly follow the Jedi Design System naming convention.`;
 
-// --- 2. ТВОЙ СЛОВАРЬ КОМПОНЕНТОВ (дополнили схемой для кнопок) ---
+// --- 2. ТВОЙ СЛОВАРЬ КОМПОНЕНТОВ  ---
 const COMPONENT_LIBRARY = {
   button: `
-  - Button Schema: {"type": "button", "bounds": {"x":0, "y":0, "width":160, "height":48}, "bg": {"color": "#148F2A", "radius": 8}, "label": {"text": "Click", "color": "#FFFFFF"}}
-  - Rule: Every button MUST be a single "button" object, not separate rectangle and text.`,
-  
-  input: `
-  - Input Rule: Rectangle border + Placeholder text 16px from left.`,
-  
-  card: `
-  - Card Rule: Rectangle with white background, 12px radius, and 16px padding.`
+  - Use type: "button".
+  - Button Schema: {
+      "type": "button",
+      "bounds": {"x":0, "y":0, "width":160, "height":48},
+      "bgVariable": "jedi/primary", 
+      "textVariable": "jedi/text/primary",
+      "radius": 8,
+      "label": "Click Me"
+    }
+  - Available BG Variables: "jedi/primary", "jedi/primary-dark", "jedi/surface", "jedi/error".
+  - Available Text Variables: "jedi/text/primary", "jedi/text/on-dark".
+  - Note: Variable names are case-sensitive and must exist in Jedi Design System.`
 };
+
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
