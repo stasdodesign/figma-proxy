@@ -29,34 +29,34 @@ const nvidiaBody = {
 };
 
 export default async function handler(req, res) {
-  // 1. Разрешаем CORS
+  // --- ЧИНИМ CORS ---
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // 2. Обработка запроса от браузера
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'GET') return res.status(200).send('Nvidia Proxy is online! 🚀');
+  // Ответ на предварительный запрос браузера (Preflight)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-  // 3. Проксируем запрос в Nvidia NIM
-try {
+  try {
     const { prompt } = req.body;
-    let dynamicSkills = "";
 
-    // --- ДИНАМИЧЕСКАЯ СБОРКА ---
-    // Ищем ключевые слова в запросе пользователя
-    if (prompt.toLowerCase().includes("button") || prompt.toLowerCase().includes("кнопк")) {
-      dynamicSkills += "\n" + COMPONENT_LIBRARY.button;
-    }
-    if (prompt.toLowerCase().includes("input") || prompt.toLowerCase().includes("поле")) {
-      dynamicSkills += "\n" + COMPONENT_LIBRARY.input;
-    }
-    // Если ничего конкретного не нашли, можно добавить базовый набор
-    if (dynamicSkills === "") {
-      dynamicSkills = "\nGeneral: Use standard rectangles and text layers.";
-    }
-
-    const finalSystemPrompt = `${BASE_SYSTEM_RULES}\n${dynamicSkills}`;
+    const nvidiaBody = {
+      model: "meta/llama-3.1-70b-instruct",
+      messages: [
+        { 
+          role: "system", 
+          content: `You are a Jedi UI Bot. Return ONLY JSON array. No comments.
+          
+          STRICT SCHEMA CONSTRAINING:
+          - Every button MUST be: {"type": "button", "bounds": {"x": 0, "y": 0, "width": 160, "height": 48}, "bg": {"color": "#148F2A", "radius": 8}, "label": {"text": "Click", "color": "#FFFFFF"}}
+          - Layout: Use 16px gaps. No complex nesting. No markdown.` 
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.1 // Делаем модель максимально "послушной"
+    };
 
     const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
@@ -64,19 +64,11 @@ try {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.NVIDIA_API_KEY}`
       },
-      body: JSON.stringify({
-        model: "meta/llama-3.1-70b-instruct",
-        messages: [
-          { role: "system", content: finalSystemPrompt },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.2 // Низкая температура для строгого соблюдения JSON
-      })
+      body: JSON.stringify(nvidiaBody)
     });
 
     const data = await response.json();
     res.status(200).json(data);
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
