@@ -2,21 +2,29 @@ export default async function handler(req, res) {
   // 1. Разрешаем CORS (чтобы Figma не ругалась)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Убрали Authorization из разрешенных заголовков, так как Figma его больше не шлет
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); 
 
   // 2. Обработка запроса от браузера (проверка связи)
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'GET') return res.status(200).send('Proxy is online! 🚀');
+  if (req.method === 'GET') return res.status(200).send('Nvidia Proxy is online! 🚀');
 
-  // 3. Проксируем запрос в Z.ai
+  // 3. Проксируем запрос в Nvidia NIM
   try {
-    const response = await fetch("https://api.z.ai/api/paas/v4/chat/completions", {
+    // Перехватываем тело запроса от Figma и принудительно ставим нужную модель
+    const requestBody = {
+      ...req.body,
+      model: "meta/llama-3.1-70b-instruct" 
+    };
+
+    const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": req.headers.authorization // Передаем ключ из плагина
+        // Ключ теперь берется безопасно из настроек самого Vercel!
+        "Authorization": `Bearer ${process.env.NVIDIA_API_KEY}` 
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(requestBody)
     });
 
     const data = await response.json();
